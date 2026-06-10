@@ -2,11 +2,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 import csv
 
-# ── 1. Lê os resultados gerados pelo medicao.c ──────────────────────────────
 ns     = []
 medias = []
 
-with open("resultados.csv", "r") as f:
+with open("../resultados/resultados.csv", "r") as f:
     reader = csv.DictReader(f)
     for row in reader:
         ns.append(int(row["n"]))
@@ -15,26 +14,19 @@ with open("resultados.csv", "r") as f:
 ns     = np.array(ns)
 medias = np.array(medias)
 
-# ── 2. Ajuste de curva com numpy.polyfit ────────────────────────────────────
-# A teoria diz que a média de iterações cresce como O(log n).
-# Fazemos o ajuste no espaço logarítmico: y ≈ a * log2(n) + b
 log_ns = np.log2(ns)
 
-# polyfit grau 1 no espaço log → curva logarítmica nos dados originais
-coef = np.polyfit(log_ns, medias, 1)   # coef = [a, b]
+coef = np.polyfit(log_ns, medias, 1)
 a, b = coef
 print(f"Curva ajustada: media ≈ {a:.4f} * log2(n) + {b:.4f}")
 
-# Valores ajustados para plotar a curva suave
 ns_smooth     = np.linspace(ns.min(), ns.max(), 500)
 medias_smooth = a * np.log2(ns_smooth) + b
 
-# ── 3. Gráfico ───────────────────────────────────────────────────────────────
 fig, axes = plt.subplots(1, 2, figsize=(14, 5))
 fig.suptitle("Heap Priority Queue – Média de Iterações de Heapify por Inserção",
              fontsize=13, fontweight="bold")
 
-# --- Gráfico 1: escala linear ---
 ax1 = axes[0]
 ax1.scatter(ns, medias, color="steelblue", zorder=5, label="Dados medidos")
 ax1.plot(ns_smooth, medias_smooth, color="tomato", linewidth=2,
@@ -45,7 +37,6 @@ ax1.set_title("Escala linear")
 ax1.legend()
 ax1.grid(True, linestyle="--", alpha=0.5)
 
-# --- Gráfico 2: eixo X em log2 (deve virar linha reta se for O(log n)) ---
 ax2 = axes[1]
 ax2.scatter(log_ns, medias, color="steelblue", zorder=5, label="Dados medidos")
 ax2.plot(log_ns, a * log_ns + b, color="tomato", linewidth=2,
@@ -61,7 +52,6 @@ plt.savefig("grafico_heap.png", dpi=150)
 plt.show()
 print("Gráfico salvo em 'grafico_heap.png'.")
 
-# ── 4. Análise textual ───────────────────────────────────────────────────────
 print("\n===== ANÁLISE DOS RESULTADOS =====")
 print(f"  Menor média  : {medias.min():.4f}  (n = {ns[medias.argmin()]})")
 print(f"  Maior média  : {medias.max():.4f}  (n = {ns[medias.argmax()]})")
@@ -73,7 +63,6 @@ print("  Se a média de iterações cresce de forma logarítmica com n,")
 print("  os resultados confirmam o que a literatura descreve.")
 print()
 
-# Calcula R² para medir qualidade do ajuste
 residuos  = medias - (a * log_ns + b)
 ss_res    = np.sum(residuos ** 2)
 ss_tot    = np.sum((medias - medias.mean()) ** 2)
