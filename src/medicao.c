@@ -4,7 +4,6 @@
 #include <time.h>
 #include "heap.h"
 
-// Lê todos os registros do CSV, retorna a quantidade lida
 int carregar_csv(const char *caminho, Item *registros, int max) {
     FILE *f = fopen(caminho, "r");
     if (!f) {
@@ -13,7 +12,6 @@ int carregar_csv(const char *caminho, Item *registros, int max) {
     }
 
     char linha[256];
-    // Pula cabeçalho
     fgets(linha, sizeof(linha), f);
 
     int count = 0;
@@ -44,7 +42,6 @@ int carregar_csv(const char *caminho, Item *registros, int max) {
     return count;
 }
 
-// Embaralha o array de registros aleatoriamente (Fisher-Yates)
 void embaralhar(Item *arr, int n) {
     for (int i = n - 1; i > 0; i--) {
         int j = rand() % (i + 1);
@@ -56,25 +53,25 @@ void embaralhar(Item *arr, int n) {
 
 int main() {
     char caminho_csv[256];
-    printf("Caminho do arquivo CSV: ");
+    printf("Nome do arquivo CSV (dentro da pasta dados): ");
     scanf("%255s", caminho_csv);
 
-    // Carrega todos os registros
+    char caminho_completo[300];
+    snprintf(caminho_completo, sizeof(caminho_completo), "../dados/%s", caminho_csv);
+
     Item *todos = malloc(10000 * sizeof(Item));
     if (!todos) { printf("Erro de memoria.\n"); return 1; }
 
-    int total = carregar_csv(caminho_csv, todos, 10000);
+    int total = carregar_csv(caminho_completo, todos, 10000);
     if (total == 0) { free(todos); return 1; }
     printf("Total de registros carregados: %d\n", total);
 
-    // Tamanhos dos subconjuntos
     int tamanhos[] = {500, 1000, 1500, 2000, 2500, 3000, 3500,
                       4000, 4500, 5000, 5500, 6000, 6500,
                       7000, 7500, 8000, 8500, 9000};
     int num_tamanhos = sizeof(tamanhos) / sizeof(tamanhos[0]);
 
-    // Arquivo de saída com os resultados
-    FILE *saida = fopen("resultados.csv", "w");
+    FILE *saida = fopen("../resultados/resultados.csv", "w");
     if (!saida) { printf("Erro ao criar resultados.csv\n"); free(todos); return 1; }
     fprintf(saida, "n,media_iteracoes\n");
 
@@ -87,10 +84,8 @@ int main() {
             continue;
         }
 
-        // Sorteia subconjunto: embaralha tudo e pega os primeiros n
         embaralhar(todos, total);
 
-        // Insere os n primeiros na heap e acumula iterações
         Heap heap;
         inicializar_heap(&heap);
 
