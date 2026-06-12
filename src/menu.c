@@ -96,6 +96,7 @@ int main() {
                 } else {
                     Item *removido = heap_remover(&heap);
                     printf("Item removido: %s %s %d %s\n", removido->nome, removido->matricula, removido->ranking, removido->curso);
+                    free(removido);
                 }   
                 pausar();
                 break;
